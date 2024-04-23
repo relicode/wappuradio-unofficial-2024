@@ -1,8 +1,6 @@
-import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
-
-const inter = Inter({ subsets: ['latin'] })
+import * as React from 'react'
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter'
+import type { Metadata, Viewport } from 'next/types'
 
 export const metadata: Metadata = {
   title: 'Wappuradio unofficial',
@@ -10,19 +8,17 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#660f11',
+  themeColor: '#f3f3d8',
   width: 'device-width',
   initialScale: 1,
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
-  return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
-    </html>
-  )
-}
+const RootLayout = ({ children }: { children: React.ReactNode }) => (
+  <html lang="en" style={{ height: '100%' }}>
+    <body style={{ height: '100%' }}>
+      <AppRouterCacheProvider>{children}</AppRouterCacheProvider>
+    </body>
+  </html>
+)
+
+export default RootLayout
