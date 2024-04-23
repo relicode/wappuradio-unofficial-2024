@@ -37,12 +37,15 @@ main {
 input,
 select,
 label {
+  accent-color: #660f11;
   background-color: #660f11;
   color: white;
 }
 
-label {
+label,
+input {
   cursor: pointer;
+  user-select: none;
 }
 
 [contenteditable='true']:focus,

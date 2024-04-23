@@ -3,19 +3,22 @@
 import { lookup } from 'mime-types'
 import { FormEvent, useEffect, useRef, useState } from 'react'
 
+const baseUrl = 'https://stream1.wappuradio.fi' as const
+
+const audioOriginSources = [
+  `${baseUrl}/wappuradio.opus`,
+  `${baseUrl}/wappuradio.ogg`,
+  `${baseUrl}/wappuradio.mp3`,
+] as const
+
 const sources = {
-  audio: [
-    'https://stream1.wappuradio.fi/wappuradio.opus',
-    'https://stream1.wappuradio.fi/wappuradio.ogg',
-    'https://stream1.wappuradio.fi/wappuradio.mp3',
-  ] as const,
+  audio: [...audioOriginSources, ...audioOriginSources.map((s) => s.replace(/stream1/, 'stream2'))],
   video: 'https://youtu.be/Iwa6X6BMqKw',
 }
 
-const sourceDescriptions = {
-  [sources.audio[0]]: 'Opus',
-  [sources.audio[1]]: 'Ogg',
-  [sources.audio[2]]: 'Mp3',
+const getSourceDescription = (url: string, capitalize = true) => {
+  const desc = url.split('.').reverse()[0] || ''
+  return capitalize ? desc.replace(/^./, desc[0].toUpperCase()) : desc
 }
 
 interface FormEventTarget extends EventTarget {
@@ -48,25 +51,35 @@ const parseFormValues = (ev?: FormEvent<HTMLFormElement>): FormValues => {
 
 export default function Home() {
   const [formValues, setFormValues] = useState(parseFormValues())
-  const [_, setUpdated] = useState(Date.now())
+  const [dimensions, setDimensions] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  })
   const { alternative, source } = formValues
+  const { width } = dimensions
 
+  const sourceMimeType = lookup(source) || ''
   const usingVideo = isVideo(source)
   const audioRef = useRef<HTMLAudioElement>(null)
 
   useEffect(() => {
-    if (!usingVideo && audioRef.current) {
-      const audioElem = audioRef.current
-      audioElem.src = source
-      if (!audioElem.paused) audioElem.play()
-    }
+    if (!usingVideo && audioRef.current) audioRef.current.src = source
   }, [source, usingVideo])
 
   useEffect(() => {
-    const handleResize = () => setUpdated(Date.now())
-    window.addEventListener('resize', handleResize)
+    let shouldUpdate = true
+    const RESIZE = 'resize'
+    const handleResize = () => {
+      if (shouldUpdate)
+        setDimensions({
+          width: window.innerWidth,
+          height: window.innerHeight,
+        })
+    }
+    window.addEventListener(RESIZE, handleResize)
     return () => {
-      window.removeEventListener('resize', handleResize)
+      shouldUpdate = false
+      window.removeEventListener(RESIZE, handleResize)
     }
   }, [])
 
@@ -81,84 +94,84 @@ export default function Home() {
       >
         <label className="flex flex-1 justify-center">
           <select name="source" defaultValue={source}>
-            {sources.audio.map((audioSrc) => (
+            {audioOriginSources.map((audioSrc) => (
               <option key={audioSrc} value={audioSrc}>
-                Audio: {sourceDescriptions[audioSrc]}
+                Audio: {getSourceDescription(audioSrc)}
               </option>
             ))}
             <option value={sources.video}>Video: YouTube</option>
           </select>
         </label>
         <label className={`flex flex-1 justify-center ${usingVideo ? 'invisible' : ''}`}>
-          <input name="alternative" type="checkbox" defaultChecked={alternative} />
-          &nbsp;Alternative stream
+          <input className="mr-4" name="alternative" type="checkbox" defaultChecked={alternative} />
+          Alternative stream
         </label>
       </form>
       <div className="flex flex-col flex-auto justify-center items-center text-center">
         <p className="flex">
+          Playing (
           {usingVideo ? (
-            <span>
-              Playing{' '}
-              <a href={source} target="_blank">
-                {source}
-              </a>
-            </span>
+            <a href={source} target="_blank">
+              {source}
+            </a>
           ) : (
-            <span>
-              Playing {lookup(source)} (
-              <a href={source} target="_blank">
-                {source}
+            <a href={source} target="_blank">
+              {source}
+            </a>
+          )}
+          )
+        </p>
+        <div className="flex-auto">
+          {usingVideo ? (
+            <iframe
+              allow="autoplay; fullscreen; encrypted-media; picture-in-picture; web-share"
+              allowFullScreen
+              frameBorder={0}
+              height={Math.round(width * 0.5621951219512196)}
+              src="https://www.youtube.com/embed/Iwa6X6BMqKw?autoplay=true"
+              title="Rakkauden Wappuradio 2024"
+              width={width}
+            />
+          ) : (
+            <audio
+              className="mt-4"
+              onCanPlay={(ev) => {
+                ev.currentTarget.play().catch((_err) => {
+                  // console.log(_err) // handling autoplay errors
+                })
+              }}
+              ref={audioRef}
+              controls
+            >
+              {sourceMimeType && <source src={source} type={sourceMimeType} />}
+              {sources.audio.map((s) => {
+                const type = lookup(s) || ''
+                return type ? <source key={s} src={s} /> : null
+              })}
+              Your browser does not support the audio element.
+            </audio>
+          )}
+          <p className={`fixed bottom-4 p-4 text-left w-1/2 ${usingVideo ? 'invisible' : ''}`}>
+            By{' '}
+            <a href="https://anssi.siren.codes/" target="_blank">
+              Anssi Siren
+            </a>
+            <span className="ml-2">
+              (
+              <a href="https://github.com/relicode/wappuradio-unofficial-2024" target="_blank">
+                Source
               </a>
               )
             </span>
-          )}
-        </p>
-        <div className={`flex flex-auto ${usingVideo ? 'items-start' : 'items-center p-4'}`}>
-          {usingVideo ? (
-            <iframe
-              width={window.innerWidth}
-              height={Math.round(window.innerWidth * 0.5621951219512196)}
-              src="https://www.youtube.com/embed/Iwa6X6BMqKw?autoplay=true"
-              title="Rakkauden Wappuradio 2024"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            />
-          ) : (
-            <div className="flex flex-col">
-              <audio
-                onCanPlay={(ev) => {
-                  ev.currentTarget.play().catch((_err) => {
-                    // console.log(_err) // handling autoplay errors
-                  })
-                }}
-                ref={audioRef}
-                controls
-              >
-                <source src={source} type={lookup(source) || ''} />
-                <source src="https://stream1.wappuradio.fi/wappuradio.opus" type="audio/opus" />
-                <source src="https://stream2.wappuradio.fi/wappuradio.opus" type="audio/opus" />
-                <source src="https://stream1.wappuradio.fi/wappuradio.ogg" type="audio/ogg" />
-                <source src="https://stream2.wappuradio.fi/wappuradio.ogg" type="audio/ogg" />
-                <source src="https://stream1.wappuradio.fi/wappuradio.mp3" type="audio/mpeg" />
-                <source src="https://stream2.wappuradio.fi/wappuradio.mp3" type="audio/mpeg" />
-                Your browser does not support the audio element.
-              </audio>
-              <p>
-                {`By `}
-                <a href="https://anssi.siren.codes/" target="_blank">
-                  Anssi Siren
-                </a>
-                <span className="ml-4">
-                  (
-                  <a href="https://github.com/relicode/wappuradio-unofficial-2024" target="_blank">
-                    Source
-                  </a>
-                  )
-                </span>
-              </p>
-            </div>
-          )}
+            <br />
+            <span>
+              Not associated with the{' '}
+              <a href="https://github.com/relicode/wappuradio-unofficial-2024" target="_blank">
+                official site
+              </a>{' '}
+              in any mean or way
+            </span>
+          </p>
         </div>
       </div>
     </main>
