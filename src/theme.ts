@@ -2,6 +2,10 @@
 import { Roboto } from 'next/font/google'
 import { createTheme } from '@mui/material/styles'
 
+export const primaryMain = '#660f11' as const
+export const secondaryMain = '#e79f84' as const
+export const backgroundPaper = '#f3f3d8' as const
+
 const roboto = Roboto({
   weight: ['300', '400', '500', '700'],
   subsets: ['latin'],
@@ -11,14 +15,14 @@ const roboto = Roboto({
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#660f11',
+      main: primaryMain,
     },
     secondary: {
-      main: '#e79f84',
+      main: secondaryMain,
     },
     background: {
-      default: '#e79f84',
-      paper: '#f3f3d8',
+      default: secondaryMain,
+      paper: backgroundPaper,
     },
   },
 
