@@ -1,2 +1,5 @@
 // eslint-disable-next-line no-console
-console.log('version 0.2.2')
+if (typeof console.table === 'function') console.table({
+  name: 'Wappuradio unofficcial',
+  version: '0.2.3',
+})
