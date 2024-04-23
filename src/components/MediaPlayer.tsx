@@ -92,7 +92,7 @@ export default function MediaPlayer() {
   return (
     <>
       <form
-        className="flex gap-4 p-4"
+        className="flex gap-2 p-4"
         onChange={(ev) => {
           setFormValues(parseFormValues(ev))
         }}
@@ -109,20 +109,19 @@ export default function MediaPlayer() {
           </select>
         </label>
         <label className={`flex flex-1 justify-center ${usingVideo ? 'invisible' : ''}`}>
-          <input className="mr-4" name="alternative" type="checkbox" defaultChecked={alternative} />
+          <input className="mr-2" name="alternative" type="checkbox" defaultChecked={alternative} />
           Alternative stream
         </label>
       </form>
       <div className="flex flex-col flex-auto justify-center items-center text-center">
         <p>
-          Playing {sourceMimeType}
-          <br />
+          {usingVideo ? null : <p>Playing {getSourceDescription(source, false)}</p>}(
           {usingVideo ? (
-            <a href={source} target="_blank">
+            <a className="text-xs" href={source} target="_blank">
               {source}
             </a>
           ) : (
-            <a href={source} target="_blank">
+            <a className="text-xs" href={source} target="_blank">
               {source}
             </a>
           )}
