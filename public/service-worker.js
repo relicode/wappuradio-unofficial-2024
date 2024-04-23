@@ -1,2 +1,2 @@
 // eslint-disable-next-line no-console
-console.log('service worker found')
+console.log('version 0.2.1')
