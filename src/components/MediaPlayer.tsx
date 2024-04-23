@@ -114,8 +114,9 @@ export default function MediaPlayer() {
         </label>
       </form>
       <div className="flex flex-col flex-auto justify-center items-center text-center">
-        <p className="flex">
-          Playing (
+        <p>
+          Playing {sourceMimeType}
+          <br />
           {usingVideo ? (
             <a href={source} target="_blank">
               {source}
