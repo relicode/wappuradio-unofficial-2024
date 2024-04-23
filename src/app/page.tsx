@@ -1,33 +1,28 @@
+'use client'
 import * as React from 'react'
-import Container from '@mui/material/Container'
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
-import Link from '@mui/material/Link'
-import NextLink from 'next/link'
-import ProTip from '@/components/ProTip'
-import Copyright from '@/components/Copyright'
+import MediaSelector from '@/components/MediaSelector'
 
-export default function Home() {
+import { streams } from '@/utils/config'
+import MediaPlayer from '@/components/MediaPlayer'
+
+const defaultStream = streams.audio[0]
+
+const Home = () => {
+  const [currentStream, setCurrentStream] = React.useState<string>(defaultStream)
+
   return (
-    <Container fixed>
-      <Box
-        sx={{
-          my: 4,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
+    <>
+      <MediaSelector
+        currentStream={currentStream}
+        streams={streams}
+        onChange={(ev) => {
+          setCurrentStream(ev.target.value)
         }}
-      >
-        <Typography variant="h4" component="h1" sx={{ mb: 2 }}>
-          Material UI - Next.js App Router example in TypeScript
-        </Typography>
-        <Link href="/about" color="secondary" component={NextLink}>
-          Go to the about page
-        </Link>
-        <ProTip />
-        <Copyright />
-      </Box>
-    </Container>
+      />
+
+      <MediaPlayer stream={currentStream} />
+    </>
   )
 }
+
+export default Home

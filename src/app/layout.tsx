@@ -1,9 +1,9 @@
 'use client'
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter'
-import { BottomNavigation, BottomNavigationAction, Dialog, Fade, Popper, Slide } from '@mui/material'
-import { styled } from '@mui/material/styles'
-import { ThemeProvider } from '@mui/material/styles'
 import * as React from 'react'
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter'
+import { BottomNavigation, BottomNavigationAction, Dialog, Link, Slide } from '@mui/material'
+// import { styled } from '@mui/material/styles'
+import { ThemeProvider } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import CssBaseline from '@mui/material/CssBaseline'
 
@@ -14,92 +14,78 @@ import theme from '@/theme'
 import { useState } from 'react'
 import CelebrationIcon from '@mui/icons-material/Celebration'
 
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-  ...theme.typography.body2,
-  padding: theme.spacing(1),
-  textAlign: 'center',
-  color: theme.palette.text.secondary,
-}))
+const dialogKeys = ['DEFAULT', 'ABOUT_ME', 'ABOUT_WAPPURADIO'] as const
+type DialogKey = (typeof dialogKeys)[number]
+const isDialogKey = (value: unknown): value is DialogKey =>
+  typeof value === 'string' && dialogKeys.includes(value as DialogKey)
 
-enum Actions {
-  DEFAULT = '',
-  WHO_AM_I = 'WHO_AM_I',
-  ABOUT_WAPPURADIO = 'ABOUT_WAPPURADIO',
-}
+const dialogContents: { [K in DialogKey]: React.ReactNode } = {
+  DEFAULT: null,
+  ABOUT_ME: (
+    <p>
+      I{"'"}m{' '}
+      <Link href="https://anssi.siren.codes/" underline="always">
+        Anssi Siren
+      </Link>
+      . I{"'"}m in no way affiliated with the{' '}
+      <Link href="https://wappuradio.fi/" underline="always">
+        Wappuradio
+      </Link>{' '}
+      organization and created this application for fun.
+    </p>
+  ),
+  ABOUT_WAPPURADIO: (
+    <p>
+      Official Wappuradio can be found{' '}
+      <Link href="https://wappuradio.fi/" underline="always">
+        here
+      </Link>
+      . This application is not related to the official team in any mean or way. Any similarity to actual persons,
+      living or dead, is more or less coincidental.
+    </p>
+  ),
+} as const
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const [value, setValue] = useState(Actions.DEFAULT)
-  const modalContent =
-    value === Actions.WHO_AM_I ? (
-      <>
-        <p>
-          Brough to you by <a href="https://anssi.siren.codes/">Anssi Siren</a>
-        </p>
-        <p>
-          Source code <a href="https://github.com/relicode/wappuradio-unofficial-2024">here</a>
-        </p>
-      </>
-    ) : (
-      ''
-    )
+  const [dialogContent, setDialogContent] = useState(dialogContents.DEFAULT)
 
   return (
-    <html lang="en">
-      <body>
-        <AppRouterCacheProvider options={{ enableCssLayer: true }}>
+    <html lang="en" style={{ height: '100%' }}>
+      <body style={{ height: '100%' }}>
+        <AppRouterCacheProvider>
           <ThemeProvider theme={theme}>
             <CssBaseline />
-            <Box sx={{ pb: 7 }}>
+            <Box sx={{ height: '100%', pb: 7 }}>
               <Dialog
-                onClose={(ev) => {
-                  setValue(Actions.DEFAULT)
-                }}
-                open={!!modalContent}
+                onClose={() => setDialogContent(dialogContents.DEFAULT)}
+                open={!!dialogContent}
                 TransitionComponent={Slide}
               >
                 <Paper elevation={3} sx={{ p: 2 }}>
-                  {modalContent}
+                  {dialogContent}
                 </Paper>
               </Dialog>
-              <Box component="main">
+              <Box component="main" sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                 {children}
-                {value}
-                {children}
-                {value}
-                {children}
-                {value}
-                {children}
-                {value}
-                {children}
-                {value}
-                {children}
-                {value}
-                {children}
-                {value}
               </Box>
-              <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3}>
-                <BottomNavigation
-                  sx={{ justifyContent: 'space-evenly' }}
-                  showLabels
-                  value={value}
-                  onChange={(_, newValue) => {
-                    if (newValue === Actions.WHO_AM_I) setValue(newValue)
-                  }}
-                >
-                  <BottomNavigationAction
-                    value={Actions.WHO_AM_I}
-                    label="By Anssi Siren"
-                    icon={<SentimentVerySatisfiedIcon />}
-                  />
-                  <BottomNavigationAction
-                    value={Actions.ABOUT_WAPPURADIO}
-                    label="About Wappuradio"
-                    icon={<CelebrationIcon />}
-                  />
-                </BottomNavigation>
-              </Paper>
             </Box>
+            <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3}>
+              <BottomNavigation
+                sx={{ justifyContent: 'space-evenly' }}
+                showLabels
+                value={dialogContents.ABOUT_ME}
+                onChange={(_, val) => {
+                  if (isDialogKey(val)) setDialogContent(dialogContents[val])
+                }}
+              >
+                <BottomNavigationAction
+                  value={'ABOUT_WAPPURADIO'}
+                  label="About Wappuradio"
+                  icon={<CelebrationIcon />}
+                />
+                <BottomNavigationAction value={'ABOUT_ME'} label="About me" icon={<SentimentVerySatisfiedIcon />} />
+              </BottomNavigation>
+            </Paper>
           </ThemeProvider>
         </AppRouterCacheProvider>
       </body>
