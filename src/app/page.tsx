@@ -1,7 +1,6 @@
 'use client'
-import * as React from 'react'
+import { useState, type ReactNode } from 'react'
 import MediaSelector from '@/components/MediaSelector'
-
 import { streams } from '@/utils/config'
 import MediaPlayer from '@/components/MediaPlayer'
 import {
@@ -17,7 +16,6 @@ import {
 } from '@mui/material'
 import theme from '@/theme'
 import { Viewport } from 'next'
-
 import SentimentVerySatisfiedIcon from '@mui/icons-material/SentimentVerySatisfied'
 import CelebrationIcon from '@mui/icons-material/Celebration'
 
@@ -32,7 +30,7 @@ export const viewport: Viewport = {
   initialScale: 1,
 }
 
-const dialogContents: { [K in DialogKey]: React.ReactNode } = {
+const dialogContents: { [K in DialogKey]: ReactNode } = {
   DEFAULT: null,
   ABOUT_ME: (
     <p>
@@ -45,6 +43,13 @@ const dialogContents: { [K in DialogKey]: React.ReactNode } = {
         Wappuradio
       </Link>{' '}
       organization and created this application for fun.
+      <br />
+      <br />
+      The source code for this application can be found{' '}
+      <Link href="https://github.com/relicode/wappuradio-unofficial-2024" target="_blank" underline="always">
+        here
+      </Link>
+      .
     </p>
   ),
   ABOUT_WAPPURADIO: (
@@ -55,6 +60,13 @@ const dialogContents: { [K in DialogKey]: React.ReactNode } = {
       </Link>
       . This application is not related to the official team in any mean or way. Any similarity to actual persons,
       living or dead, is more or less coincidental.
+      <br />
+      <br />
+      The source code for this application can be found{' '}
+      <Link href="https://github.com/relicode/wappuradio-unofficial-2024" target="_blank" underline="always">
+        here
+      </Link>
+      .
     </p>
   ),
 } as const
@@ -62,8 +74,8 @@ const dialogContents: { [K in DialogKey]: React.ReactNode } = {
 const defaultStream = streams.audio[0]
 
 const Home = () => {
-  const [currentStream, setCurrentStream] = React.useState<string>(defaultStream)
-  const [dialogContent, setDialogContent] = React.useState(dialogContents.DEFAULT)
+  const [currentStream, setCurrentStream] = useState<string>(defaultStream)
+  const [dialogContent, setDialogContent] = useState(dialogContents.DEFAULT)
 
   return (
     <ThemeProvider theme={theme}>
